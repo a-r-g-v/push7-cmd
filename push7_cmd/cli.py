@@ -21,7 +21,7 @@ def add(ctx, appno, apikey):
     ctx.obj.add_application(appno, apikey)
     print('added the app(appno:%s)')
     ctx.obj.set_default_application(appno)
-    print('set the app(appno:%s) as default application ', % (str(appno), ))
+    print('set the app(appno:%s) as default application ' % (str(appno), ))
 
 @applications.command()
 @click.pass_context
@@ -35,7 +35,7 @@ def list(ctx):
 def use(ctx, appno):
     ctx.obj.logger.debug("incoming appno : %s " % (str(appno),) )
     ctx.obj.set_default_application(appno)
-    print('set the app(appno:%s) as default application ', % (str(appno), ))
+    print('set the app(appno:%s) as default application ' % (str(appno), ))
 
 @applications.command()
 @click.argument('appno')

@@ -3,12 +3,16 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import logging
 
 
-def get_logger():
-    return logging.getLogger(__name__)
+def get_logger(logger_name=None):
+    from logging import getLogger
+    if not logger_name:
+        logger_name = "push7_cmd"
+
+    return getLogger(logger_name)
 
 
 def _init_logger():
-    logger = get_logger()
+    logger = get_logger(__name__)
     logger.setLevel(logging.DEBUG)
 
     formatter = logging.Formatter(

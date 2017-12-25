@@ -1,3 +1,9 @@
+# coding: utf-8
+from __future__ import absolute_import, division, print_function, unicode_literals
+
+from push7_cmd import get_logger
+from push7_cmd.exceptions import (NotFoundApplicationException, FailedToAuthorizationException,
+        Push7ServerErrorException, Push7CmdBaseException)
 
 
 class StateStore(object):
@@ -22,16 +28,38 @@ class StateStore(object):
 
 class Push7Sendable(object):
 
+    def __init__(self, client):
+        self._client = client
+
     def send(self):
-        pass
+        from push7.exceptions import (
+                NotFoundException, Push7BaseException, 
+                ForbiddenException, UnauthorizedException,
+                ServerErrorException
+                )
+        try:
+            self._client.push(self._title, self._body, self._icon, self._url).send()
+        except NotFoundException as e:
+            get_logger().error.exception("Sendable Client Error", e)
+            raise NotFoundApplicationException(self._client.appno)
+        except (ForbiddenException, UnauthorizedException) as e:
+            get_logger().error.exception("Sendable Client Error", e)
+            raise FailedToAuthorizationException(self._client.appno)
+        except ServerErrorException as e:
+            get_logger().error.exception("Sendable Server Error", e)
+            raise Push7ServerErrorException(e)
+        except Push7BaseException as e:
+            get_logger().critical.exception("Sendable Library Error", e)
+            raise Push7CmdBaseException(e)
 
 
 
 class Push(Push7Sendable):
-    def __init__(self, title, body, icon, url, disappear=None, client=None):
+    def __init__(self, client, title, body, icon, url, disappear=None):
         """
             Note: Currently, we do not support disappear push.
         """
+        super(Push7Sendable, self).__init__(client)
 
         if disappear:
             import warning
@@ -62,7 +90,7 @@ class Application(object):
     def url(self):
         return self.URL
 
-    def create_push(self, body, title=None, icon=None, url=None, disappear=None, client=None):
+    def create_push(self, body, title=None, icon=None, url=None, disappear=None):
 
         if not title:
             title = self.DEFAULT_TITLE
@@ -74,31 +102,28 @@ class Application(object):
             url = self.DEFAULT_URL
 
 
-        return self.PUSH_CLS(title, body, icon, url, disappear=disappear, client=client)
+        return self.PUSH_CLS(self._client, title, body, icon, url, disappear=disappear)
 
 class Interactor(object):
     APPLICATION_CLS = Application
     STATE_STORE_CLS = StateStore
-    LOGGER_NAME = "push7_cmd"
 
-    def __init__(self):
-        from logging import getLogger
+    def __init__(self, logger_name=None):
         self._store = self.STATE_STORE_CLS()
-        self._logger = getLogger('push7_cmd')
+        self._logger = get_logger(logger_name)
 
     def create_application(self, appno, apikey):
         new_application = Application(appno, apikey)
         self._store.save_application(new_application)
-        return new_application
 
     def list_application(self):
         return self._store.list_applications()
 
     def delete_application(self, appno):
-        return self._store.delete_application(appno)
+        self._store.delete_application(appno)
 
     def set_default_application(self, appno):
-        return self._store.save_default_application(appno)
+        self._store.save_default_application(appno)
 
     def create_push_using_default_application(self, body, title=None):
         application = self._store.get_default_application()
