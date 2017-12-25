@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from push7_cmd import get_logger
 from push7_cmd.exceptions import (NotFoundApplicationException, FailedToAuthorizationException,
-        Push7ServerErrorException, Push7CmdBaseException)
+        Push7ServerErrorException, Push7CmdBaseException, NotFoundDefaultApplicationException)
 
 
 class StateStore(object):
@@ -19,7 +19,10 @@ class StateStore(object):
         return False
 
     def get_default_application(self):
-        return None
+        application = None
+        if not application:
+            raise NotFoundDefaultApplicationException()
+        return application
 
     def save_default_application(self, appno):
         return False
@@ -59,7 +62,7 @@ class Push(Push7Sendable):
         """
             Note: Currently, we do not support disappear push.
         """
-        super(Push7Sendable, self).__init__(client)
+        super(Push, self).__init__(client)
 
         if disappear:
             import warning
