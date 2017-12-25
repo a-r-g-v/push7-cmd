@@ -18,16 +18,17 @@ def applications():
 @click.pass_context
 def add(ctx, appno, apikey):
     ctx.obj.logger.debug("incoming appno : %s apikey : %s " % (str(appno), str(apikey)) )
-    ctx.obj.add_application(appno, apikey)
-    print('added the app(appno:%s)')
+    ctx.obj.create_application(appno, apikey)
+    print('added the app(appno:%s)' % (str(appno), ))
     ctx.obj.set_default_application(appno)
     print('set the app(appno:%s) as default application ' % (str(appno), ))
 
 @applications.command()
 @click.pass_context
 def list(ctx):
-    for i in ctx.obj.list_applications():
-        print('')
+    print('appno')
+    for application in ctx.obj.list_applications():
+        print('%s' % application.appno)
 
 @applications.command()
 @click.argument('appno')

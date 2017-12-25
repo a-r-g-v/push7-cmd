@@ -3,30 +3,93 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from push7_cmd import get_logger
 from push7_cmd.exceptions import (NotFoundApplicationException, FailedToAuthorizationException,
-        Push7ServerErrorException, Push7CmdBaseException, NotFoundDefaultApplicationException)
+        Push7ServerErrorException, Push7CmdBaseException, NotFoundDefaultApplicationException,
+        NotFoundRegistedApplicationException)
+from os.path import expanduser
+import six
+
+class State(object):
+
+    STATE_STORE_FILE_PATH = 'config'
+    STATE_STORE_DIR_PATH = expanduser("~/.push7-cmd/")
+    STATE_STORE_PATH = STATE_STORE_DIR_PATH + STATE_STORE_FILE_PATH
+
+    def __init__(self):
+        self.applications = {}
+        self.default_appno = None
+
+    def save(self):
+        with open(self.STATE_STORE_PATH, mode='wb') as f:
+            import pickle
+            pickle.dump(self, f)
+
+    @classmethod
+    def restore(cls):
+        obj = None
+        with open(cls.STATE_STORE_PATH, mode='rb') as f:
+            import pickle
+            obj = pickle.load(f)
+
+        if isinstance(obj, cls):
+            return obj
+
+        import os
+        os.remove(cls.STATE_STORE_PATH)
+        get_logger().critical('A restored state object from PATH is not instance of State class. This command removed the PATH and created new ones.')
+        return cls.new()
 
 
-class StateStore(object):
-    DEFAULT_PERSISTENT_STORE = '~/.push7-cmd/'
+    @classmethod
+    def new(cls):
+        import os, os.path
+        try:
+            os.makedirs(cls.STATE_STORE_DIR_PATH)
+        except OSError as e:
+            if not os.path.isdir(cls.STATE_STORE_DIR_PATH):
+                raise
+
+        return cls()
+
+    @classmethod
+    def new_or_restore(cls):
+        import os.path
+        if os.path.exists(cls.STATE_STORE_PATH):
+            return cls.restore()
+
+        return cls.new()
+
+class Repository(object):
+    STATE_CLS = State
 
     def save_application(self, application):
-        return None
+        self._store = State.new_or_restore()
+        self._store.applications.update({application.appno : application})
+        self._store.save()
 
     def list_applications(self):
-        return []
+        self._store = State.new_or_restore()
+        return six.itervalues(self._store.applications)
 
     def delete_application(self, appno):
-        return False
+        self._store = State.new_or_restore()
+        try:
+            self._store.applications.pop(appno)
+        except IndexError:
+            raise NotFoundRegistedApplicationException(appno)
+        finally:
+            self._store.save()
 
     def get_default_application(self):
-        application = None
+        self._store = State.new_or_restore()
+        application = self._store.applications.get(self._store.default_appno, None)
         if not application:
             raise NotFoundDefaultApplicationException()
         return application
 
     def save_default_application(self, appno):
-        return False
-
+        self._store = State.new_or_restore()
+        self._store.default_appno = appno
+        self._store.save()
 
 
 class Push7Sendable(object):
@@ -107,19 +170,26 @@ class Application(object):
 
         return self.PUSH_CLS(self._client, title, body, icon, url, disappear=disappear)
 
+    @property
+    def appno(self):
+        return self._appno
+
+    def __eq__(self, other):
+        return self.appno == other.appno
+
 class Interactor(object):
     APPLICATION_CLS = Application
-    STATE_STORE_CLS = StateStore
+    STORE_CLS = Repository
 
     def __init__(self, logger_name=None):
-        self._store = self.STATE_STORE_CLS()
+        self._store = self.STORE_CLS()
         self._logger = get_logger(logger_name)
 
     def create_application(self, appno, apikey):
         new_application = Application(appno, apikey)
         self._store.save_application(new_application)
 
-    def list_application(self):
+    def list_applications(self):
         return self._store.list_applications()
 
     def delete_application(self, appno):

@@ -26,3 +26,7 @@ class Push7ServerErrorException(Push7CmdBaseException):
 class NotFoundDefaultApplicationException(Push7CmdBaseException):
     exit_code = 68
     exit_message = "This command has not any application. First, please add a application into this command."
+
+class NotFoundRegistedApplicationException(Push7CmdBaseException):
+    exit_code = 69
+    exit_message = "An application was not found which has the given appno."

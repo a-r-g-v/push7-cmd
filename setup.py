@@ -85,7 +85,7 @@ setup(
     url=URL,
     packages=find_packages(exclude=('tests',)),
     entry_points={
-         'console_scripts': ['push7=push7:cli'],
+        'console_scripts': ['push7=push7_cmd.cli:invoke'],
     },
     install_requires=REQUIRED,
     include_package_data=True,
