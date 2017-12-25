@@ -20,7 +20,7 @@ AUTHOR = 'Yuki Mukasa'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-        'push7', 'click'
+        'push7', 'click', 'click_default_group', 'six'
 ]
 
 # The rest you shouldn't have to touch too much :)
