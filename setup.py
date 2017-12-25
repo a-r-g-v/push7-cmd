@@ -12,7 +12,7 @@ from shutil import rmtree
 from setuptools import find_packages, setup, Command
 
 # Package meta-data.
-NAME = 'push7-cmd'
+NAME = 'push7_cmd'
 DESCRIPTION = 'easy notification command on terminal using push7'
 URL = 'https://github.com/a-r-g-v/push7-cmd'
 EMAIL = 'info@arg.vc'
