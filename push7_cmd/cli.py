@@ -46,9 +46,10 @@ def delete(ctx, appno):
     ctx.obj.delete_application(appno)
 
 @click.group(cls=DefaultGroup, default='main', default_if_no_args=True)
+@click.option('--debug', is_flag=True, default=False)
 @click.pass_context
-def cli(ctx):
-    pass
+def cli(ctx, debug):
+    ctx.obj = Interactor(is_debug=debug)
 
 @click.option('--title', '-t', default=None)
 @click.option('--body', '-b', default=None)
@@ -65,8 +66,7 @@ def main(ctx, title, body):
 cli.add_command(applications)
 
 def invoke():
-    intractor = Interactor()
-    cli(obj=intractor)
+    cli()
 
 if __name__ == '__main__':
     invoke()

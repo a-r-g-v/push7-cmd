@@ -1,7 +1,7 @@
 # coding: utf-8
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from push7_cmd import get_logger
+from push7_cmd import get_logger, add_handler
 from push7_cmd.exceptions import (NotFoundApplicationException, FailedToAuthorizationException,
         Push7ServerErrorException, Push7CmdBaseException, NotFoundDefaultApplicationException,
         NotFoundRegistedApplicationException)
@@ -181,9 +181,13 @@ class Interactor(object):
     APPLICATION_CLS = Application
     STORE_CLS = Repository
 
-    def __init__(self, logger_name=None):
+    def __init__(self, is_debug=False, logger_name=None):
+        import logging
         self._store = self.STORE_CLS()
         self._logger = get_logger(logger_name)
+
+        logger_level = logging.INFO if not is_debug else logging.DEBUG
+        add_handler(self._logger, level=logger_level)
 
     def create_application(self, appno, apikey):
         new_application = Application(appno, apikey)
