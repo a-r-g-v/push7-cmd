@@ -3,7 +3,7 @@
 class StateStore(object):
     DEFAULT_PERSISTENT_STORE = '~/.push7-cmd/'
 
-    def add_application(self, application):
+    def save_application(self, application):
         return None
 
     def list_applications(self):
@@ -15,7 +15,7 @@ class StateStore(object):
     def get_default_application(self):
         return None
 
-    def set_default_application(self, appno):
+    def save_default_application(self, appno):
         return False
 
 
@@ -89,7 +89,6 @@ class Interactor(object):
     def create_application(self, appno, apikey):
         new_application = Application(appno, apikey)
         self._store.save_application(new_application)
-        self._store.set_default_application(new_application)
         return new_application
 
     def list_application(self):
@@ -99,7 +98,7 @@ class Interactor(object):
         return self._store.delete_application(appno)
 
     def set_default_application(self, appno):
-        return self._store.set_default_application(appno)
+        return self._store.save_default_application(appno)
 
     def create_push_using_default_application(self, body, title=None):
         application = self._store.get_default_application()

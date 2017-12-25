@@ -6,7 +6,6 @@ from six.moves import input
 from click_default_group import DefaultGroup
 
 from push7_cmd.models import Interactor
-#from push7_cmd.exceptions import Push7CmdBaseException
 
 
 @click.group()
@@ -20,11 +19,15 @@ def applications():
 def add(ctx, appno, apikey):
     ctx.obj.logger.debug("incoming appno : %s apikey : %s " % (str(appno), str(apikey)) )
     ctx.obj.add_application(appno, apikey)
+    print('added the app(appno:%s)')
+    ctx.obj.set_default_application(appno)
+    print('set the app(appno:%s) as default application ', % (str(appno), ))
 
 @applications.command()
 @click.pass_context
 def list(ctx):
-    ctx.obj.list_applications()
+    for i in ctx.obj.list_applications():
+        print('')
 
 @applications.command()
 @click.argument('appno')
@@ -32,6 +35,7 @@ def list(ctx):
 def use(ctx, appno):
     ctx.obj.logger.debug("incoming appno : %s " % (str(appno),) )
     ctx.obj.set_default_application(appno)
+    print('set the app(appno:%s) as default application ', % (str(appno), ))
 
 @applications.command()
 @click.argument('appno')
