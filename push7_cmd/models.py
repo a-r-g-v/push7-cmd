@@ -1,6 +1,4 @@
 
-class PersistentErrorException(Exception):
-    pass
 
 class StateStore(object):
     DEFAULT_PERSISTENT_STORE = '~/.push7-cmd/'
