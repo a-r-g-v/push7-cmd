@@ -20,7 +20,7 @@ AUTHOR = 'Yuki Mukasa'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-        'push7', 'click'
+        'push7', 'click', 'click_default_group', 'six'
 ]
 
 # The rest you shouldn't have to touch too much :)
@@ -85,7 +85,7 @@ setup(
     url=URL,
     packages=find_packages(exclude=('tests',)),
     entry_points={
-         'console_scripts': ['push7=push7:cli'],
+        'console_scripts': ['push7=push7_cmd.cli:invoke'],
     },
     install_requires=REQUIRED,
     include_package_data=True,
